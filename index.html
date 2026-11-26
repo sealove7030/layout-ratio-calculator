@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="デザインカンプで測ったpxを親要素に対する割合（%）へ変換し、Flexbox・GridのCSSを生成するツールです。"
+    />
+    <title>レイアウト比率計算ツール</title>
+
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+
+  <body>
+    <header class="site-header">
+      <a
+        class="brand"
+        href="#"
+        aria-label="レイアウト比率計算ツール トップ"
+      >
+        <span class="brand-mark" aria-hidden="true">%</span>
+        <span>レイアウト比率計算ツール</span>
+      </a>
+
+      <span class="header-note">px → %</span>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <p class="eyebrow">LAYOUT UTILITY</p>
+
+        <h1 id="page-title">
+          デザインカンプのpxを、<br />
+          <span>使える割合</span>に。
+        </h1>
+
+        <p class="lead">
+          親要素・テキスト・間隔・地図・画像の幅を入力するだけ。<br
+            class="desktop-only"
+          />
+          レイアウト比率とCSSをリアルタイムで生成します。
+        </p>
+      </section>
+
+      <section class="workspace" aria-label="比率計算ツール">
+        <!-- 入力パネル -->
+        <div class="input-panel panel">
+          <div class="panel-heading">
+            <div>
+              <p class="step">STEP 01</p>
+              <h2>デザインカンプの測定値</h2>
+            </div>
+
+            <button
+              class="text-button"
+              id="resetButton"
+              type="button"
+            >
+              入力をクリア
+            </button>
+          </div>
+
+          <form id="ratioForm" novalidate>
+            <label class="field field-parent">
+              <span class="field-label">親要素の外幅</span>
+
+              <span class="input-wrap">
+                <input
+                  id="parentWidth"
+                  name="parentWidth"
+                  type="number"
+                  min="0.01"
+                  step="any"
+                  inputmode="decimal"
+                  placeholder="例：1200"
+                  aria-describedby="parentError"
+                />
+                <span class="unit">px</span>
+              </span>
+
+              <span
+                class="error"
+                id="parentError"
+                aria-live="polite"
+              ></span>
+            </label>
+
+            <p class="field-help">
+              外側の幅を入力します。左右の余白を引いた内側の幅は自動計算します。
+            </p>
+
+            <div class="field-grid field-grid-padding">
+              <label class="field">
+                <span class="field-label">左パディング</span>
+                <span class="input-wrap">
+                  <input
+                    id="paddingLeft"
+                    name="paddingLeft"
+                    type="number"
+                    min="0"
+                    step="any"
+                    inputmode="decimal"
+                    placeholder="例：40（省略可）"
+                    aria-describedby="formMessage"
+                  />
+                  <span class="unit">px</span>
+                </span>
+              </label>
+
+              <label class="field">
+                <span class="field-label">右パディング</span>
+                <span class="input-wrap">
+                  <input
+                    id="paddingRight"
+                    name="paddingRight"
+                    type="number"
+                    min="0"
+                    step="any"
+                    inputmode="decimal"
+                    placeholder="例：40（省略可）"
+                    aria-describedby="formMessage"
+                  />
+                  <span class="unit">px</span>
+                </span>
+              </label>
+            </div>
+
+            <p class="inner-width-note" id="innerWidthNote" aria-live="polite">
+              内側の幅：外幅 − 左右のパディング
+            </p>
+
+            <div class="field-grid">
+              <label class="field">
+                <span class="field-label">
+                  <span class="swatch swatch-text"></span>
+                  テキスト
+                </span>
+
+                <span class="input-wrap">
+                  <input
+                    id="textWidth"
+                    name="textWidth"
+                    type="number"
+                    min="0"
+                    step="any"
+                    inputmode="decimal"
+                    placeholder="例：480"
+                    aria-describedby="formMessage"
+                  />
+                  <span class="unit">px</span>
+                </span>
+              </label>
+
+              <label class="field">
+                <span class="field-label">
+                  <span class="swatch swatch-gap"></span>
+                  間隔
+                </span>
+
+                <span class="input-wrap">
+                  <input
+                    id="gapWidth"
+                    name="gapWidth"
+                    type="number"
+                    min="0"
+                    step="any"
+                    inputmode="decimal"
+                    placeholder="例：72"
+                    aria-describedby="formMessage"
+                  />
+                  <span class="unit">px</span>
+                </span>
+              </label>
+
+              <label class="field">
+                <span class="field-label">
+                  <span class="swatch swatch-map"></span>
+                  地図・画像
+                </span>
+
+                <span class="input-wrap">
+                  <input
+                    id="mapWidth"
+                    name="mapWidth"
+                    type="number"
+                    min="0"
+                    step="any"
+                    inputmode="decimal"
+                    placeholder="例：648"
+                    aria-describedby="formMessage"
+                  />
+                  <span class="unit">px</span>
+                </span>
+              </label>
+            </div>
+
+            <p
+              class="form-message"
+              id="formMessage"
+              aria-live="polite"
+            ></p>
+          </form>
+
+          <div class="formula">
+            <span>計算式</span>
+            <code>各要素 ÷ 内側の幅 × 100</code>
+          </div>
+        </div>
+
+        <!-- 計算結果 -->
+        <div class="result-panel panel">
+          <div class="panel-heading">
+            <div>
+              <p class="step">STEP 02</p>
+              <h2>計算結果</h2>
+            </div>
+
+            <div class="status" id="totalStatus" role="status">
+              <span class="status-icon" aria-hidden="true">—</span>
+              <span id="statusText">入力待ち</span>
+            </div>
+          </div>
+
+          <div
+            class="ratio-visual"
+            id="ratioVisual"
+            aria-label="要素の比率プレビュー"
+          >
+            <div class="segment segment-text" id="textSegment">
+              <span>テキスト</span>
+            </div>
+
+            <div
+              class="segment segment-gap"
+              id="gapSegment"
+              aria-label="間隔"
+            ></div>
+
+            <div class="segment segment-map" id="mapSegment">
+              <span>地図・画像</span>
+            </div>
+          </div>
+
+          <div class="results" aria-live="polite">
+            <div class="result-item">
+              <span>左パディング</span>
+              <strong id="paddingLeftResult">—</strong>
+            </div>
+
+            <div class="result-item">
+              <span>右パディング</span>
+              <strong id="paddingRightResult">—</strong>
+            </div>
+
+            <div class="result-item">
+              <span>
+                <span class="swatch swatch-text"></span>
+                テキスト
+              </span>
+              <strong id="textResult">—</strong>
+            </div>
+
+            <div class="result-item">
+              <span>
+                <span class="swatch swatch-gap"></span>
+                間隔
+              </span>
+              <strong id="gapResult">—</strong>
+            </div>
+
+            <div class="result-item">
+              <span>
+                <span class="swatch swatch-map"></span>
+                地図・画像
+              </span>
+              <strong id="mapResult">—</strong>
+            </div>
+          </div>
+
+          <div class="total-row">
+            <span>使用幅の合計</span>
+            <strong id="totalResult">—</strong>
+          </div>
+
+          <p class="difference" id="differenceText">
+            幅を入力すると計算結果が表示されます。
+          </p>
+        </div>
+      </section>
+
+      <!-- CSSの出力 -->
+      <section class="css-section" aria-labelledby="css-title">
+        <div class="css-heading">
+          <div>
+            <p class="step">STEP 03</p>
+            <h2 id="css-title">CSSをコピー</h2>
+          </div>
+
+          <div class="css-actions">
+            <div
+              class="layout-switch"
+              role="group"
+              aria-label="レイアウト方式"
+            >
+              <button
+                class="layout-option is-active"
+                type="button"
+                data-mode="flex"
+                aria-pressed="true"
+              >
+                Flex
+              </button>
+
+              <button
+                class="layout-option"
+                type="button"
+                data-mode="grid"
+                aria-pressed="false"
+              >
+                Grid
+              </button>
+            </div>
+
+            <button
+              class="copy-button"
+              id="copyButton"
+              type="button"
+              disabled
+            >
+              <span class="copy-icon" aria-hidden="true"></span>
+              <span id="copyButtonText">CSSをコピー</span>
+            </button>
+          </div>
+        </div>
+
+        <p class="css-note" id="layoutSummary" aria-live="polite">
+          幅を入力すると、各要素の割合とCSSが表示されます。
+        </p>
+
+        <div class="code-block">
+          <pre><code id="cssOutput">/* 幅を入力するとCSSを生成します */</code></pre>
+        </div>
+
+        <p class="css-note">
+          左側がテキスト、右側が地図の2列レイアウトです。
+          CSSの割合は小数第2位までの概数です。
+          スマートフォンで縦並びにする指定は、別途追加してください。
+        </p>
+
+        <!-- 対応するHTML -->
+        <div class="css-heading">
+          <div>
+            <h3>対応するHTMLの例</h3>
+          </div>
+        </div>
+
+        <p class="css-note">
+          上のCSSは、下のHTML構造に対応しています。
+          自分のコードで使う場合は、HTMLとCSSのクラス名を合わせてください。
+        </p>
+
+        <div class="code-block">
+          <pre><code>&lt;!-- テキストと地図・画像を囲む親要素 --&gt;
+&lt;div class="layout"&gt;
+
+  &lt;!-- 左側：テキスト --&gt;
+  &lt;div class="layout__text"&gt;
+    テキストを入れます
+  &lt;/div&gt;
+
+  &lt;!-- 右側：地図・画像--&gt;
+  &lt;div class="layout__map"&gt;
+    地図・画像を入れます
+  &lt;/div&gt;
+
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <p class="css-note">
+          地図のiframeや画像の幅は、それぞれの枠に収まるように指定してください。
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>デザインカンプの測定値から、レイアウトに使える割合へ。</p>
+    </footer>
+  </body>
+</html>
